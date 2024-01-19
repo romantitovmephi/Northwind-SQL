@@ -18,16 +18,7 @@ WHERE freight > freight_avg AND shipped_date BETWEEN '1996-07-16' AND '1996-07-3
 GROUP BY customer_id
 ORDER BY freight_sum 
 
---3 заджоинил вместо подзапроса
-SELECT orders.order_id, customer_id, ship_country, order_date, SUM(unit_price * quantity * (1 - discount)) AS order_price
-FROM orders
-JOIN order_details USING(order_id)
-WHERE ship_country IN ('Argentina', 'Venezuela', 'Mexico', 'Brazil') AND order_date >= '1997-09-01' 
-GROUP BY orders.order_id, customer_id, ship_country, order_date
-ORDER BY order_price DESC
-LIMIT 3
-
---3 версия автора (другой список стран)
+--3 
 SELECT customer_id, ship_country, order_price
 FROM orders
 JOIN (SELECT order_id, SUM(unit_price * quantity * (1 - discount)) AS order_price
