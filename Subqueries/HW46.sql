@@ -32,5 +32,6 @@ LIMIT 3
 --4
 SELECT DISTINCT product_name
 FROM products
-JOIN order_details USING(product_id)
-WHERE quantity = 10
+WHERE product_id IN (SELECT product_id
+		     FROM order_details
+		     WHERE quantity = 10)
