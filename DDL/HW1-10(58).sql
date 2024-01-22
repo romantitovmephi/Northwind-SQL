@@ -62,7 +62,6 @@ CREATE TABLE student
 	full_name varchar,
 	course int DEFAULT 1
 )
-DROP TABLE student
 
 INSERT INTO student (full_name, course)
 VALUES
@@ -76,4 +75,3 @@ VALUES
 --10
 ALTER TABLE student
 ALTER COLUMN course DROP DEFAULT
-
