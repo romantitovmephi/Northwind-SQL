@@ -75,3 +75,22 @@ VALUES
 --10
 ALTER TABLE student
 ALTER COLUMN course DROP DEFAULT
+
+--11
+ALTER TABLE products
+ADD CONSTRAINT CHK_products_unit_price CHECK(unit_price > 0)
+
+--12
+SELECT MAX(product_id)
+FROM products
+
+CREATE SEQUENCE IF NOT EXISTS products_product_id_seq
+START WITH 77 OWNED BY products.product_id
+
+ALTER TABLE products
+ALTER COLUMN product_id SET DEFAULT nextval('products_product_id_seq')
+
+--13
+INSERT INTO products(product_name, category_id, discontinued)
+VALUES('pasta', 7, 0)
+RETURNING product_id
