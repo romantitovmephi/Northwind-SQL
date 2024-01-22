@@ -1,4 +1,4 @@
-## 048 ДЗ 1 по DDL
+## ДЗ 1 по DDL
 
 1. Создать таблицу teacher с полями teacher_id serial, first_name varchar, last_name varchar, birthday date, phone varchar, title varchar
 
@@ -18,7 +18,7 @@
 
 9. Удалить все данные из таблицы со сбросом идентификатор в исходное состояние
 
-## 058 ДЗ 2 по DDL
+## ДЗ 2 по DDL
 
 1. Создать таблицу exam с полями:
 
