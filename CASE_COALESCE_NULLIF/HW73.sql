@@ -11,14 +11,14 @@ ORDER BY contact_name, COALESCE(city, country)
 --2
 SELECT product_name, unit_price, 
 	CASE WHEN unit_price >= 100 THEN 'too expensive'
-		 WHEN unit_price >= 50 AND unit_price < 100 THEN 'average'
-		 ELSE 'low price'
+	     WHEN unit_price >= 50 AND unit_price < 100 THEN 'average'
+	     ELSE 'low price'
 	END AS amount
 FROM products
 ORDER BY unit_price DESC
 
 --3
-SELECT DISTINCT contact_name, COALESCE(TO_CHAR(NULLIF(order_id, NULL), 'FM99999999'), 'no orders') AS order_status
+SELECT customer_id, COALESCE(TO_CHAR(order_id, 'FM99999999'), 'no orders') AS order_status
 FROM customers
 LEFT JOIN orders USING(customer_id)
 WHERE order_id IS NULL
@@ -26,10 +26,3 @@ WHERE order_id IS NULL
 --4
 SELECT first_name, last_name, COALESCE(NULLIF(title, 'Sales Representative'), 'Sales Stuff') AS title
 FROM employees
-
-SELECT *
-FROM employees
-
-
-
-
