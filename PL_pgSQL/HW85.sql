@@ -14,10 +14,12 @@ SELECT COUNT(*)
 FROM backup_customers
 
 -- 2
-CREATE OR REPLACE FUNCTION avg_freight() RETURNS real AS $$
+CREATE OR REPLACE FUNCTION avg_freight() RETURNS float8 AS $$
 	SELECT AVG(freight)
 	FROM orders
 $$ LANGUAGE SQL
+
+SELECT avg_freight()
 
 -- 3 
 CREATE OR REPLACE FUNCTION get_rand_num(lower_bound int, upper_bound int) RETURNS int AS $$
