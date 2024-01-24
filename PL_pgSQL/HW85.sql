@@ -1,27 +1,23 @@
 -- 1
 CREATE OR REPLACE FUNCTION backup_customers() RETURNS void AS $$
-	DROP TABLE IF EXISTS back_customers;
-	--так лучше
-	CREATE TABLE back_customers AS
+	DROP TABLE IF EXISTS backup_customers;
+	
+	CREATE TABLE backup_customers AS
 	SELECT *
 	FROM customers
-	--SELECT *
-	--INTO back_customers
-	--FROM customers
 $$ LANGUAGE SQL
 
-SELECT backup_customers()
+-- вызов функции
+SELECT backup_customers() 
 
-SELECT *
-FROM back_customers
+SELECT COUNT(*)
+FROM backup_customers
 
 -- 2
-CREATE OR REPLACE FUNCTION average_freight() RETURNS float8 AS $$
+CREATE OR REPLACE FUNCTION avg_freight() RETURNS real AS $$
 	SELECT AVG(freight)
 	FROM orders
 $$ LANGUAGE SQL
-
-SELECT average_freight()
 
 -- 3 
 CREATE OR REPLACE FUNCTION get_rand_num(lower_bound int, upper_bound int) RETURNS int AS $$
