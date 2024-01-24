@@ -22,63 +22,21 @@ $$ LANGUAGE SQL
 SELECT avg_freight()
 
 -- 3 
-CREATE OR REPLACE FUNCTION get_rand_num(lower_bound int, upper_bound int) RETURNS int AS $$
-	SELECT floor(random()*((upper_bound - lower_bound) + 1) + lower_bound)
+CREATE OR REPLACE FUNCTION get_random_number(left_border int, right_border int) RETURNS int AS $$
+	SELECT floor((right_border - left_border + 1) * random() + left_border) 
 $$ LANGUAGE SQL
 
-SELECT get_rand_num(1, 3)
-FROM generate_series(1, 5) -- показал автор
+SELECT get_random_number(1, 5) AS random_number
 
 -- 4
-
--- когда есть OUT параметры, то RETURNS не нужен
--- в моей таблице нет salary
--- добавляем столбец
-ALTER TABLE employees
-ADD COLUMN salary int
-
--- поменяем тип столбца salary
-ALTER TABLE employees
-ALTER COLUMN salary SET DATA TYPE real
-
--- так добавить значения не получается, 
--- потому что есть огран-я по другим столбцам?
-INSERT INTO employees(salary)
-VALUES 
-('475'),
-('5686'),
-('456'),
-('56'),
-('47565'),
-('53686'),
-('48956'),
-('516'),
-('5');
-
--- добавляем рандомные значения salary через UPDATE столбца в таблице employees
-UPDATE employees
-SET salary = floor(random()*((5000 - 500) + 1) + 500)
-WHERE salary IS NOT NULL -- изначально salary IS NULL везде
-
-SELECT salary
-FROM employees
-
--- сама функция
-CREATE OR REPLACE FUNCTION get_employee_salary(employee_city varchar, OUT min_salary int, OUT max_salary int) AS $$
+CREATE OR REPLACE FUNCTION get_salary_employees_by_city(city varchar, OUT min_salary real, OUT max_salary real) AS $$
 	SELECT MIN(salary), MAX(salary)
 	FROM employees
-	WHERE city = employee_city
+	WHERE city = city
 $$ LANGUAGE SQL
 
--- если со * он выдаст все выходные параметры
-SELECT * 
-FROM get_employee_salary('London') 
--- а так только один кортеж
-SELECT get_employee_salary('London')
-
-SELECT * 
-FROM employees
-WHERE city = 'London'
+SELECT *
+FROM get_salary_employees_by_city('London')
 
 -- 5
 DROP FUNCTION correct_salary()
