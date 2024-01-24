@@ -1,5 +1,5 @@
-insert into customers(customer_id, contact_name, city, country, company_name)
-values 
+INSERT INTO customers(customer_id, contact_name, city, country, company_name)
+VALUES 
 ('AAAAA', 'Alfred Mann', NULL, 'USA', 'fake_company'),
 ('BBBBB', 'Alfred Mann', NULL, 'Austria','fake_company');
 
