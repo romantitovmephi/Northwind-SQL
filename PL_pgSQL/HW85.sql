@@ -66,7 +66,8 @@ FROM employees
 ORDER BY salary
 
 -- 6
---DROP FUNCTION correct_salary
+DROP FUNCTION correct_salary
+		
 CREATE OR REPLACE FUNCTION correct_salary(min_salary real DEFAULT 2500, per_correct real DEFAULT 0.15) RETURNS SETOF employees AS $$
 	UPDATE employees
 	SET salary = salary + (salary * per_correct)
@@ -78,8 +79,9 @@ SELECT *
 FROM correct_salary()
 
 -- 7
-DROP FUNCTION correct_salary_3
-CREATE OR REPLACE FUNCTION correct_salary_3(min_salary real DEFAULT 2500, per_correct real DEFAULT 0.15) 
+DROP FUNCTION correct_salary
+		
+CREATE OR REPLACE FUNCTION correct_salary(min_salary real DEFAULT 2500, per_correct real DEFAULT 0.15) 
 RETURNS TABLE (last_name varchar, first_name varchar, title varchar, salary real) AS $$
 	UPDATE employees
 	SET salary = salary + (salary * per_correct)
@@ -88,7 +90,7 @@ RETURNS TABLE (last_name varchar, first_name varchar, title varchar, salary real
 $$ LANGUAGE SQL
 
 SELECT * 
-FROM correct_salary_3()
+FROM correct_salary()
 
 -- 8
 DROP FUNCTION check_shipping(integer)
