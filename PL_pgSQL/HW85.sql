@@ -93,52 +93,29 @@ SELECT *
 FROM correct_salary()
 
 -- 8
-DROP FUNCTION check_shipping(integer)
--- функция проверена и правильно работает
-CREATE OR REPLACE FUNCTION check_shipping(ship_method int) RETURNS SETOF orders AS $$
+CREATE OR REPLACE FUNCTION orders_by_ship_method(ship_method int) RETURNS SETOF orders AS $$
 DECLARE
-	max_freight_ship_method real;
-	correct_max_freight_ship_method real;
-	avg_freight_ship_method real;
-	avg_avg_freight real;
+	max_freight real;
+	avg_freight real;
+	avg_max_and_avg_freight real;
 BEGIN
-	SELECT MAX(freight) INTO max_freight_ship_method
+	SELECT MAX(freight), AVG(freight)
+	INTO max_freight, avg_freight
 	FROM orders
 	WHERE ship_via = ship_method;
-	--RETURN max_freight_ship_method; --для проверки
-	
-	correct_max_freight_ship_method = max_freight_ship_method * 0.7; 
-	--RETURN correct_max_freight_ship_method; 
-	--ЗАМЕЧАНИЕ: если записать RETURN correct_max_freight_ship_method = max_freight_ship_method * 0.7;
-	--вернется NULL, тк значение еще не будет вычислено
-	
-	SELECT AVG(freight) INTO avg_freight_ship_method
-	FROM orders
-	WHERE ship_via = ship_method;
-	--RETURN avg_freight_ship_method;
-	
-	avg_avg_freight = (correct_max_freight_ship_method + avg_freight_ship_method) / 2;
-	--RETURN avg_avg_freight;
-	--AVG здесь НЕ РАБОТАЕТ, надо брать ср. ариф-ое /2
 
-	RETURN QUERY 
-	SELECT *
+	max_freight = 0.7 * max_freight;
+	avg_max_and_avg_freight = (max_freight + avg_freight) / 2;
+	
+	RETURN QUERY
+	SELECT * 
 	FROM orders
-	WHERE freight < avg_avg_freight AND ship_via = ship_method -- логично дописать условие
-	--GROUP BY order_id
-	--HAVING ship_via = ship_method; 
-	ORDER BY freight DESC;
-
+	WHERE freight < avg_max_and_avg_freight; 
 END;
 $$ LANGUAGE plpgsql;
 
-
-SELECT *
-FROM orders
-
-SELECT *
-FROM check_shipping(1)
-
+SELECT COUNT(*) FROM orders_by_ship_method(1)
+	
 -- 9
 CREATE OR REPLACE FUNCTION check_salary(c int, max int DEFAULT 80, min int DEFAULT 30, r real DEFAULT 0.2) RETURNS bool AS $$
 BEGIN
