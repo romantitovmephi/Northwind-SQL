@@ -29,6 +29,17 @@ $$ LANGUAGE SQL
 SELECT get_random_number(1, 5) AS random_number
 
 -- 4
+-- в моей таблице нет salary
+-- добавляем столбец
+ALTER TABLE employees
+ADD COLUMN salary real
+
+-- добавляем рандомные значения salary через UPDATE столбца в таблице employees
+UPDATE employees
+SET salary = floor(random()*((5000 - 500) + 1) + 500)
+WHERE salary IS NOT NULL -- изначально salary IS NULL везде
+
+-- сама функция		
 CREATE OR REPLACE FUNCTION get_salary_employees_by_city(city varchar, OUT min_salary real, OUT max_salary real) AS $$
 	SELECT MIN(salary), MAX(salary)
 	FROM employees
@@ -55,8 +66,8 @@ FROM employees
 ORDER BY salary
 
 -- 6
---DROP FUNCTION correct_salary_2
-CREATE OR REPLACE FUNCTION correct_salary_2(min_salary real DEFAULT 2500, per_correct real DEFAULT 0.15) RETURNS SETOF employees AS $$
+--DROP FUNCTION correct_salary
+CREATE OR REPLACE FUNCTION correct_salary(min_salary real DEFAULT 2500, per_correct real DEFAULT 0.15) RETURNS SETOF employees AS $$
 	UPDATE employees
 	SET salary = salary + (salary * per_correct)
 	WHERE salary <= min_salary
@@ -64,7 +75,7 @@ CREATE OR REPLACE FUNCTION correct_salary_2(min_salary real DEFAULT 2500, per_co
 $$ LANGUAGE SQL
 
 SELECT * 
-FROM correct_salary_2()
+FROM correct_salary()
 
 -- 7
 DROP FUNCTION correct_salary_3
