@@ -1,86 +1,53 @@
 -- 1
 CREATE OR REPLACE FUNCTION backup_customers() RETURNS void AS $$
-	DROP TABLE IF EXISTS back_customers;
-	--так лучше
-	CREATE TABLE back_customers AS
+	DROP TABLE IF EXISTS backup_customers;
+	
+	CREATE TABLE backup_customers AS
 	SELECT *
 	FROM customers
-	--SELECT *
-	--INTO back_customers
-	--FROM customers
 $$ LANGUAGE SQL
 
-SELECT backup_customers()
+-- вызов функции
+SELECT backup_customers() 
 
-SELECT *
-FROM back_customers
+SELECT COUNT(*)
+FROM backup_customers
 
 -- 2
-CREATE OR REPLACE FUNCTION average_freight() RETURNS float8 AS $$
+CREATE OR REPLACE FUNCTION avg_freight() RETURNS float8 AS $$
 	SELECT AVG(freight)
 	FROM orders
 $$ LANGUAGE SQL
 
-SELECT average_freight()
+SELECT avg_freight()
 
 -- 3 
-CREATE OR REPLACE FUNCTION get_rand_num(lower_bound int, upper_bound int) RETURNS int AS $$
-	SELECT floor(random()*((upper_bound - lower_bound) + 1) + lower_bound)
+CREATE OR REPLACE FUNCTION get_random_number(left_border int, right_border int) RETURNS int AS $$
+	SELECT floor((right_border - left_border + 1) * random() + left_border) 
 $$ LANGUAGE SQL
 
-SELECT get_rand_num(1, 3)
-FROM generate_series(1, 5) -- показал автор
+SELECT get_random_number(1, 5) AS random_number
 
 -- 4
-
--- когда есть OUT параметры, то RETURNS не нужен
 -- в моей таблице нет salary
 -- добавляем столбец
 ALTER TABLE employees
-ADD COLUMN salary int
-
--- поменяем тип столбца salary
-ALTER TABLE employees
-ALTER COLUMN salary SET DATA TYPE real
-
--- так добавить значения не получается, 
--- потому что есть огран-я по другим столбцам?
-INSERT INTO employees(salary)
-VALUES 
-('475'),
-('5686'),
-('456'),
-('56'),
-('47565'),
-('53686'),
-('48956'),
-('516'),
-('5');
+ADD COLUMN salary real
 
 -- добавляем рандомные значения salary через UPDATE столбца в таблице employees
 UPDATE employees
 SET salary = floor(random()*((5000 - 500) + 1) + 500)
 WHERE salary IS NOT NULL -- изначально salary IS NULL везде
 
-SELECT salary
-FROM employees
-
--- сама функция
-CREATE OR REPLACE FUNCTION get_employee_salary(employee_city varchar, OUT min_salary int, OUT max_salary int) AS $$
+-- сама функция		
+CREATE OR REPLACE FUNCTION get_salary_employees_by_city(city varchar, OUT min_salary real, OUT max_salary real) AS $$
 	SELECT MIN(salary), MAX(salary)
 	FROM employees
-	WHERE city = employee_city
+	WHERE city = city
 $$ LANGUAGE SQL
 
--- если со * он выдаст все выходные параметры
-SELECT * 
-FROM get_employee_salary('London') 
--- а так только один кортеж
-SELECT get_employee_salary('London')
-
-SELECT * 
-FROM employees
-WHERE city = 'London'
+SELECT *
+FROM get_salary_employees_by_city('London')
 
 -- 5
 DROP FUNCTION correct_salary()
@@ -99,8 +66,9 @@ FROM employees
 ORDER BY salary
 
 -- 6
---DROP FUNCTION correct_salary_2
-CREATE OR REPLACE FUNCTION correct_salary_2(min_salary real DEFAULT 2500, per_correct real DEFAULT 0.15) RETURNS SETOF employees AS $$
+DROP FUNCTION correct_salary
+		
+CREATE OR REPLACE FUNCTION correct_salary(min_salary real DEFAULT 2500, per_correct real DEFAULT 0.15) RETURNS SETOF employees AS $$
 	UPDATE employees
 	SET salary = salary + (salary * per_correct)
 	WHERE salary <= min_salary
@@ -108,11 +76,12 @@ CREATE OR REPLACE FUNCTION correct_salary_2(min_salary real DEFAULT 2500, per_co
 $$ LANGUAGE SQL
 
 SELECT * 
-FROM correct_salary_2()
+FROM correct_salary()
 
 -- 7
-DROP FUNCTION correct_salary_3
-CREATE OR REPLACE FUNCTION correct_salary_3(min_salary real DEFAULT 2500, per_correct real DEFAULT 0.15) 
+DROP FUNCTION correct_salary
+		
+CREATE OR REPLACE FUNCTION correct_salary(min_salary real DEFAULT 2500, per_correct real DEFAULT 0.15) 
 RETURNS TABLE (last_name varchar, first_name varchar, title varchar, salary real) AS $$
 	UPDATE employees
 	SET salary = salary + (salary * per_correct)
@@ -121,55 +90,32 @@ RETURNS TABLE (last_name varchar, first_name varchar, title varchar, salary real
 $$ LANGUAGE SQL
 
 SELECT * 
-FROM correct_salary_3()
+FROM correct_salary()
 
 -- 8
-DROP FUNCTION check_shipping(integer)
--- функция проверена и правильно работает
-CREATE OR REPLACE FUNCTION check_shipping(ship_method int) RETURNS SETOF orders AS $$
+CREATE OR REPLACE FUNCTION orders_by_ship_method(ship_method int) RETURNS SETOF orders AS $$
 DECLARE
-	max_freight_ship_method real;
-	correct_max_freight_ship_method real;
-	avg_freight_ship_method real;
-	avg_avg_freight real;
+	max_freight real;
+	avg_freight real;
+	avg_max_and_avg_freight real;
 BEGIN
-	SELECT MAX(freight) INTO max_freight_ship_method
+	SELECT MAX(freight), AVG(freight)
+	INTO max_freight, avg_freight
 	FROM orders
 	WHERE ship_via = ship_method;
-	--RETURN max_freight_ship_method; --для проверки
-	
-	correct_max_freight_ship_method = max_freight_ship_method * 0.7; 
-	--RETURN correct_max_freight_ship_method; 
-	--ЗАМЕЧАНИЕ: если записать RETURN correct_max_freight_ship_method = max_freight_ship_method * 0.7;
-	--вернется NULL, тк значение еще не будет вычислено
-	
-	SELECT AVG(freight) INTO avg_freight_ship_method
-	FROM orders
-	WHERE ship_via = ship_method;
-	--RETURN avg_freight_ship_method;
-	
-	avg_avg_freight = (correct_max_freight_ship_method + avg_freight_ship_method) / 2;
-	--RETURN avg_avg_freight;
-	--AVG здесь НЕ РАБОТАЕТ, надо брать ср. ариф-ое /2
 
-	RETURN QUERY 
-	SELECT *
+	max_freight = 0.7 * max_freight;
+	avg_max_and_avg_freight = (max_freight + avg_freight) / 2;
+	
+	RETURN QUERY
+	SELECT * 
 	FROM orders
-	WHERE freight < avg_avg_freight AND ship_via = ship_method -- логично дописать условие
-	--GROUP BY order_id
-	--HAVING ship_via = ship_method; 
-	ORDER BY freight DESC;
-
+	WHERE freight < avg_max_and_avg_freight; 
 END;
 $$ LANGUAGE plpgsql;
 
-
-SELECT *
-FROM orders
-
-SELECT *
-FROM check_shipping(1)
-
+SELECT COUNT(*) FROM orders_by_ship_method(1)
+	
 -- 9
 CREATE OR REPLACE FUNCTION check_salary(c int, max int DEFAULT 80, min int DEFAULT 30, r real DEFAULT 0.2) RETURNS bool AS $$
 BEGIN
