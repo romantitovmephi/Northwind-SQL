@@ -81,9 +81,6 @@ ORDER BY order_id DESC;
 INSERT INTO order_details
 VALUES (11077, 80, 15, 5, 0);
 
-SELECT * 
-FROM order_details_audit;
-
 UPDATE order_details
 SET unit_price = 25
 WHERE order_id = 11077 AND product_id = 80;
