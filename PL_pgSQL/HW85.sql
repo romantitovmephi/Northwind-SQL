@@ -117,21 +117,27 @@ $$ LANGUAGE plpgsql;
 SELECT COUNT(*) FROM orders_by_ship_method(1)
 	
 -- 9
-CREATE OR REPLACE FUNCTION check_salary(c int, max int DEFAULT 80, min int DEFAULT 30, r real DEFAULT 0.2) RETURNS bool AS $$
-BEGIN
-	IF c >= min THEN
+CREATE OR REPLACE FUNCTION check_salary_level(
+	salary real,
+	max_salary real DEFAULT 80,
+	min_salary real DEFAULT 30,
+	index_salary real DEFAULT 0.2) RETURNS bool AS $$
+BEGIN	
+	IF salary >= min_salary THEN
 		RETURN false;
 	ELSE 
-		c = c * (1 + r);
-			IF c > max THEN
+		salary = salary * (1 + index_salary);
+			IF salary > max_salary THEN
 				RETURN false;
 			ELSE
 				RETURN true;
 			END IF;
-	END IF;
-	
+	END IF;	
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT check_salary(79, 95, 80, 0.2)
+-- проверка
+SELECT check_salary_with_exception(40, 80, 30, 0.2)
+SELECT check_salary_with_exception(79, 81, 80, 0.2)
+SELECT check_salary_with_exception(79, 95, 80, 0.2)
 
