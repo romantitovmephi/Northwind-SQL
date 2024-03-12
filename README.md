@@ -1,1 +1,1 @@
-## Выполнение практических заданий по SQL (Northwind database by Microsoft)
+## Выполнение практических заданий по SQL (Northwind database)
